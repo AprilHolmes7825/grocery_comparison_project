@@ -1,0 +1,21 @@
+CREATE TABLE store(
+	id INTEGER NOT NULL,
+	store VARCHAR(255) PRIMARY KEY NOT NULL,
+	category VARCHAR(255)
+);
+
+SELECT * FROM store
+
+
+CREATE TABLE product(
+	id INTEGER PRIMARY KEY NOT NULL,
+	product VARCHAR(255),
+	brand VARCHAR(255),
+	size VARCHAR(255),
+	ingredient VARCHAR(255),
+	store VARCHAR(255),
+	date DATE NOT NULL, 
+	FOREIGN KEY (store) REFERENCES store(store)
+);
+
+SELECT * FROM product
