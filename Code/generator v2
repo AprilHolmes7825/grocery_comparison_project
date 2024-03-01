@@ -1,0 +1,95 @@
+# from flask import Flask
+# import pandas as pd
+# from import_export import get_products_dataframe
+
+# df = pd.DataFrame()
+# df = get_products_dataframe()
+
+
+import numpy as np
+
+import sqlalchemy
+from sqlalchemy.ext.automap import automap_base
+from sqlalchemy.orm import Session
+from sqlalchemy import create_engine, func
+
+from import_export import get_products_dataframe
+
+from flask import Flask, jsonify
+
+
+#################################################
+# Database Setup
+#################################################
+engine = create_engine("sqlite:///grocery.sqlite")
+
+# reflect an existing database into a new model
+Base = automap_base()
+# reflect the tables
+Base.prepare(autoload_with=engine)
+
+# Save reference to the table
+products = Base.classes.products
+
+#################################################
+# Flask Setup
+#################################################
+app = Flask(__name__)
+
+
+#################################################
+# Flask Routes
+#################################################
+
+@app.route("/")
+def welcome():
+    """List all available api routes."""
+    return (
+        f"Available Routes:<br/>"
+        f"/api/v1.0/names<br/>"
+        f"/api/v1.0/product_info"
+    )
+
+
+@app.route("/api/v1.0/names")
+def names():
+    # Create our session (link) from Python to the DB
+    session = Session(engine)
+
+    """Return a list of all passenger names"""
+    # Query all passengers
+    results = session.query(products.product).all()
+
+    session.close()
+
+    # Convert list of tuples into normal list
+    all_names = list(np.ravel(results))
+
+    return jsonify(all_names)
+
+
+@app.route("/api/v1.0/product_info")
+def product_info():
+    # Create our session (link) from Python to the DB
+    session = Session(engine)
+
+    """Return a list of passenger data including the name, age, and sex of each passenger"""
+    # Query all passengers
+    results = session.query(products.price, products.store, products.ingredient).all()
+
+    session.close()
+
+    # Create a dictionary from the row data and append to a list of all_passengers
+    all_Stores = []
+    for price, store, ingredient in results:
+        groceries = {}
+        groceries["price"] = price
+        groceries["store"] = store
+        groceries["ingredient"] = ingredient
+        all_Stores.append(groceries)
+
+    return jsonify(all_Stores)
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
