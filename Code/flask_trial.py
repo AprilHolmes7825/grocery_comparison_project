@@ -41,6 +41,7 @@ def welcome():
     )
 
 
+
 @app.route("/api/v1.0/names")
 def names():
     # Create our session (link) from Python to the DB
