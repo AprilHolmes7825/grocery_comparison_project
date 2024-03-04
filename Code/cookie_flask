@@ -55,32 +55,33 @@ def allstoresmin():
 
     return render_template('cookie_html.html', store_min_prices=store_min_prices)
 
-# @app.route("/your_cookie")
-# def allstoresmin():
-#     session = Session(engine)
+@app.route("/your_cookie")
+def yourcookie():
+    session = Session(engine)
 
-#     results = session.query(products.store, products.ingredient, func.min(products.price).label('min_price')) \
-#         .group_by(products.store, products.ingredient) \
-#         .all()
+    results = session.query(products.store, products.ingredient, func.min(products.price).label('min_price')) \
+        .group_by(products.store, products.ingredient) \
+        .all()
 
-#     session.close()
+    session.close()
 
-#     # Create a dictionary to store the results grouped by store
-#     store_min_prices = {}
-#     for store, ingredient, min_price in results:
-#         if store not in store_min_prices:
-#             store_min_prices[store] = {}
-#         if ingredient not in store_min_prices[store]:
-#             store_min_prices[store][ingredient] = min_price
-#         else:
-#             store_min_prices[store][ingredient] += min_price
+    # Create a dictionary to store the results grouped by store
+    store_min_prices = {}
+    for store, ingredient, min_price in results:
+        if store not in store_min_prices:
+            store_min_prices[store] = {}
+        if ingredient not in store_min_prices[store]:
+            store_min_prices[store][ingredient] = min_price
+        else:
+            store_min_prices[store][ingredient] += min_price
     
-#     # Convert the dictionary into a list of dictionaries
-#     min_prices_list = []
-#     for store, ingredients in store_min_prices.items():
-#         total_min_price = sum(ingredients.values())
-#         min_prices_list.append({'store': store, 'total_min_price': total_min_price})
+    # Convert the dictionary into a list of dictionaries
+    min_prices_list = []
+    for store, ingredients in store_min_prices.items():
+        total_min_price = sum(ingredients.values())
+        min_prices_list.append({'store': store, 'total_min_price': total_min_price})
     
+    return render_template('cookie_html.html', store_min_prices=store_min_prices)
 
 if __name__ == '__main__':
      app.run(debug=True)
