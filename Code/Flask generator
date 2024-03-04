@@ -4,105 +4,210 @@
 
 # df = pd.DataFrame()
 # df = get_products_dataframe()
-
+from flask import Flask, render_template
+import pandas as pd
+import json
+import plotly
+import plotly.express as px
 
 import numpy as np
-
 import sqlalchemy
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine, func
-
 from import_export import get_products_dataframe
-
 from flask import Flask, jsonify
 
-
-#################################################
 # Database Setup
-#################################################
 engine = create_engine("sqlite:///grocery.sqlite")
 
 # reflect an existing database into a new model
 Base = automap_base()
+
 # reflect the tables
 Base.prepare(autoload_with=engine)
 
 # Save reference to the table
 products = Base.classes.products
 
-#################################################
 # Flask Setup
-#################################################
 app = Flask(__name__)
 
-
-#################################################
 # Flask Routes
-#################################################
-
 @app.route("/")
 def welcome():
     """List all available api routes."""
     return (
         f"Select which cookie info you'd like to see!<br/>"
-        f"/Overall cookie info<br/>"
-        f"/All product info"
+        f"/allstores<br/>"
+        f"/your_cookie<br/>"
+        f"/bar_chart_store_totals<br/>"
     )
 
+@app.route("/allstores")
+def allstoresmin():
 
-@app.route("/Overall cookie info")
-def names():
-    # Create our session (link) from Python to the DB
     session = Session(engine)
 
-    """Return a list of all passenger names"""
-    # Query all passengers
-
-    #aldi_query = session.query(products).\
-      #  filter(products.store == 'Aldi').groupby.all()
-    aldi_query = session.query(products.ingredient, func.min(products.price)).group_by(products.ingredient).\
-        filter(products.store == 'Aldi').all()
-  
-
+    results = session.query(products.store, products.ingredient, func.min(products.price).label('min_price')) \
+        .group_by(products.store, products.ingredient) \
+        .all()
 
     session.close()
 
-    aldi = list(np.ravel(aldi_query))
-    return jsonify(aldi)
+    
+    # Create a dictionary to store the results grouped by store
+    store_min_prices = {}
+    for store, ingredient, min_price in results:
+        if store not in store_min_prices:
+            store_min_prices[store] = []
+        store_min_prices[store].append({'ingredient': ingredient, 'min_price': min_price})
+    
+    # Convert the dictionary into a list of dictionaries
+    min_prices_list = [{'store': store, 'ingredients': values} for store, values in store_min_prices.items()]
+    
+    return jsonify(min_prices_list)
+
+    # min_prices = []
+    # for store, ingredient, min_price in results:
+    #     min_prices.append({'store': store, 'ingredient': ingredient, 'min_price': min_price})
+    
+    # return jsonify(min_prices)
 
 
-#127.0.0.1:5000/Overall cookie info
-
-
-    # Convert list of tuples into normal list
-    #all_names = list(np.ravel(results))
-
-    #return jsonify(all_cookies)
-
-
-@app.route("/All product info")
-def product_info():
-    # Create our session (link) from Python to the DB
-    session = Session(engine)
-
-    """Return a list of passenger data including the name, age, and sex of each passenger"""
-    # Query all passengers
-    results = session.query(products.price, products.store, products.ingredient).all()
-
-    session.close()
-
+#results = session.query(products.store, products.ingredient, func.min(products.price)).all().group_by(products.ingredient).all()
     # Create a dictionary from the row data and append to a list of all_passengers
-    all_Stores = []
-    for price, store, ingredient in results:
-        groceries = {}
-        groceries["price"] = price
-        groceries["store"] = store
-        groceries["ingredient"] = ingredient
-        all_Stores.append(groceries)
+    # all_Stores = []
+    # for price, store, ingredient in results:
+    #     groceries = {}
+    #     groceries["price"] = price
+    #     groceries["store"] = store
+    #     groceries["ingredient"] = ingredient
+    #     all_Stores.append(groceries)
 
-    return jsonify(all_Stores)
+    # return jsonify(all_Stores)
+
+@app.route("/your_cookie")
+def yourcookie():
+    session = Session(engine)
+
+    results = session.query(products.store, products.ingredient, func.min(products.price).label('min_price')) \
+        .group_by(products.store, products.ingredient) \
+        .all()
+
+    session.close()
+
+    # Create a dictionary to store the results grouped by store
+    store_min_prices = {}
+    for store, ingredient, min_price in results:
+        if store not in store_min_prices:
+            store_min_prices[store] = {}
+        if ingredient not in store_min_prices[store]:
+            store_min_prices[store][ingredient] = min_price
+        else:
+            store_min_prices[store][ingredient] += min_price
+    
+    # Convert the dictionary into a list of dictionaries
+    min_prices_list = []
+    for store, ingredients in store_min_prices.items():
+        total_min_price = sum(ingredients.values())
+        min_prices_list.append({'store': store, 'total_min_price': total_min_price})
+    
+    return jsonify(min_prices_list)
+
+@app.route('/bar_chart_store_totals')
+def homepage():
+    session = Session(engine)
+
+    results = session.query(products.store, products.ingredient, func.min(products.price).label('min_price')) \
+        .group_by(products.store, products.ingredient) \
+        .all()
+
+    session.close()
+
+    store_min_prices = {}
+    for store, ingredient, min_price in results:
+        if store not in store_min_prices:
+            store_min_prices[store] = []
+        store_min_prices[store].append({'ingredient': ingredient, 'min_price': min_price})
+
+    # Convert the dictionary into a list of dictionaries
+    min_prices_list = [{'store': store, 'ingredients': values} for store, values in store_min_prices.items()]
+
+    # Convert the list of dictionaries to a DataFrame
+    df = pd.DataFrame(min_prices_list)
+    df = df.set_index('store')
+
+    # Define Plot Data
+    labels = df.index.tolist()
+    
+    # Calculate the total minimum price for each store
+    data = df['ingredients'].apply(lambda x: sum(item['min_price'] for item in x)).tolist()
+
+    # Return the components to the HTML template
+    return render_template(
+        template_name_or_list='store_tot_barchart.html',
+        data=data,
+        labels=labels,
+    )
+ 
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+     app.run(debug=True)
+
+# @app.route("/Overall cookie info")
+# def names():
+#     # Create our session (link) from Python to the DB
+#     session = Session(engine)
+
+#     """Return a list of all passenger names"""
+#     # Query all passengers
+
+#     #aldi_query = session.query(products).\
+#       #  filter(products.store == 'Aldi').groupby.all()
+#     aldi_query = session.query(products.ingredient, func.min(products.price)).group_by(products.ingredient).\
+#         filter(products.store == 'Aldi').all()
+  
+
+
+#     session.close()
+
+#     aldi = list(np.ravel(aldi_query))
+#     return jsonify(aldi)
+
+
+# #127.0.0.1:5000/Overall cookie info
+
+
+#     # Convert list of tuples into normal list
+#     #all_names = list(np.ravel(results))
+
+#     #return jsonify(all_cookies)
+
+
+# @app.route("/All product info")
+# def product_info():
+#     # Create our session (link) from Python to the DB
+#     session = Session(engine)
+
+#     #"""Return a list of passenger data including the name, age, and sex of each passenger"""
+#     # Query all passengers
+#     results = session.query(products.price, products.store, products.ingredient).all()
+
+
+#     session.close()
+
+#     # Create a dictionary from the row data and append to a list of all_passengers
+#     all_Stores = []
+#     for price, store, ingredient in results:
+#         groceries = {}
+#         groceries["price"] = price
+#         groceries["store"] = store
+#         groceries["ingredient"] = ingredient
+#         all_Stores.append(groceries)
+
+#     return jsonify(all_Stores)
+
+
+

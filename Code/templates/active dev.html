@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Stores</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='cookie_css.css') }}">
+    <style>
+        .ingredients {
+            display: none; /* Hide by default */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        {% for store, ingredients in store_min_prices.items() %}
+            <div class="store">
+                <h2 class="store-name">
+                    <img class="store-cookie" src="{{ url_for('static', filename='cookie.svg') }}" alt="Cookie SVG">{{ store }}
+                </h2>
+                <div class="ingredients">
+                    {% for ingredient, min_price in ingredients.items() %}
+                        <div class="ingredient">
+                            <span>{{ ingredient }}</span> - ${{ min_price }}
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="total-price">
+                    <strong>Total Price:</strong> ${{ '%.2f'|format(ingredients.values()|map('float')|sum) }}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <script>
+        document.querySelectorAll('.store-name').forEach(function(element) {
+            element.addEventListener('click', function() {
+                var ingredients = this.nextElementSibling;
+                ingredients.style.display = (ingredients.style.display === 'none') ? 'block' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>

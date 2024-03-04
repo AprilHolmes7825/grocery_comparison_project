@@ -1,0 +1,86 @@
+
+import numpy as np
+import sqlalchemy
+from sqlalchemy.ext.automap import automap_base
+from sqlalchemy.orm import Session
+from sqlalchemy import create_engine, func
+from import_export import get_products_dataframe
+from flask import Flask, jsonify, render_template
+
+
+engine = create_engine("sqlite:///grocery.sqlite")
+
+Base = automap_base()
+
+Base.prepare(autoload_with=engine)
+
+products = Base.classes.products
+
+app = Flask(__name__)
+
+@app.route("/")
+def welcome():
+    return (
+        f"Select which cookie info you'd like to see!<br/>"
+        f"/allstores gives the minimum cost of ingredients per store, and /cookiedata returns a json of all data<br/>"
+        f"<br/>"
+        f"/allstores<br/>"
+        f"/cookiedata<br/>"
+        #f"/Overall cookie info<br/>"
+        #f"/All product info"
+    )
+    
+
+@app.route("/allstores")
+def allstoresmin():
+    session = Session(engine)
+
+    results = session.query(products.store, products.ingredient, func.min(products.price).label('min_price')) \
+        .group_by(products.store, products.ingredient) \
+        .all()
+
+    session.close()
+
+    store_min_prices = {}
+    for store, ingredient, min_price in results:
+        if store not in store_min_prices:
+            store_min_prices[store] = {}
+        if ingredient not in store_min_prices[store]:
+            store_min_prices[store][ingredient] = min_price
+        else:
+            store_min_prices[store][ingredient] += min_price
+
+    return render_template('cookie_html.html', store_min_prices=store_min_prices)
+
+@app.route("/cookiedata")
+def yourcookie():
+    session = Session(engine)
+
+    results = session.query(products.store, products.ingredient, products.price) \
+        .group_by(products.store, products.ingredient) \
+        .all()
+
+
+    session.close()
+
+    return jsonify(results)
+
+
+if __name__ == '__main__':
+     app.run(debug=True)
+
+     #     store_min_prices = {}
+#     for store, ingredient, min_price in results:
+#         if store not in store_min_prices:
+#             store_min_prices[store] = {}
+#         if ingredient not in store_min_prices[store]:
+#             store_min_prices[store][ingredient] = min_price
+#         else:
+#             store_min_prices[store][ingredient] += min_price
+    
+#     min_prices_list = []
+#     for store, ingredients in store_min_prices.items():
+#         total_min_price = sum(ingredients.values())
+#         min_prices_list.append({'store': store, 'total_min_price': total_min_price})
+    
+#     return render_template('cookie_html.html', store_min_prices=store_min_prices)
