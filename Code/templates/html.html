@@ -2,20 +2,23 @@
 <!--<html lang="en">-->
 
 <head>
-  <link rel="stylesheet" href="css.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css.css') }}">
 </head>
 
 
 <body>
   
-  <div class=" title"></div>
-    <p>Click for your cookie! </p>
+  <div class="title"></div>
+    <p>Hover over for your cookie</p>
   <div class='cookie-button'>
     <div class='main-cookie'>
-      <p>{{overall_lowest}}</p>
+      <p>CookieFinder!</p>
     </div>
     <div class='cookie-sheet-details'>
-      <p>Content to be Exposed</p>
+      <p>Cookie cost per store</p>
+      <p>JSON data</p>
     </div>
   </div>
 
