@@ -57,13 +57,22 @@ def yourcookie():
     session = Session(engine)
 
     results = session.query(products.store, products.ingredient, products.price) \
-        .group_by(products.store, products.ingredient) \
+        .group_by(products.store) \
         .all()
 
 
     session.close()
 
-    return jsonify(results)
+    all_Stores = []
+    for price, store, ingredient in results:
+        groceries = {}
+        groceries["price"] = price
+        groceries["store"] = store
+        groceries["ingredient"] = ingredient
+        all_Stores.append(groceries)
+
+    return jsonify(all_Stores)
+
 
 
 if __name__ == '__main__':
