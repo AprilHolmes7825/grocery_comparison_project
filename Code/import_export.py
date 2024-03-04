@@ -54,23 +54,27 @@ def addTo_products_dataframe(product_df):
         session.commit()
 
 
-def update_records():
-    # Create engine using the `demographics.sqlite` database file
-    engine = create_engine("sqlite:///../grocery.sqlite")
+def get_products_dataframe():
+    # Create engine using the `grocery.sqlite` database file
 
+    engine = create_engine("sqlite:///../grocery.sqlite")
+    
     # Declare a Base using `automap_base()`
     Base = automap_base()
 
     # Use the Base class to reflect the database tables
     Base.prepare(autoload_with=engine)
 
+    # Print all of the classes mapped to the Base
+    # Base.classes.keys()
     
+    session = Session(engine)
     session = Session(bind=engine)
 
+    #query = session.query(Table_Name).filter(Table_Name.language != 'english')
+    query = session.query(text("* FROM products"))
 
-    date_rows = session.query("Select * from products where date is null")
+    df = pd.read_sql(query.statement, engine)
 
-
-    for row in date_rows:
-        print(row.product)
-        print(row.store)
+    session.close()
+    return df
