@@ -65,7 +65,11 @@ The database is automatically updated each time you run the data gathering/api s
 # ETHICAL CONDSIDERATIONS
 
 While scraping the websites for Aldi and Walmart has an overall minimal impact on their traffic, it's not how these websites were designed or intended to be used.
-Therefore, it was important to us to have as little impact as possible, which is why we've set this system to only webscrape when we need to update the database. 
+Therefore, it was important to us to have as little impact as possible, which is why we've set this system to only webscrape when we need to update the database. \
+
+# KNOWN ISSUE
+Walmart website has changed while working on this project, causing data collection to fail in the past. We've worked to fix the issue, but longevity isn't necessarily guranteed.
+Further updates to the website could cause issues in the future.
 
 
 
