@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import create_engine, func
 from import_export import get_products_dataframe
 from flask import Flask, jsonify, render_template
+import pandas as pd
 
 
 engine = create_engine("sqlite:///grocery.sqlite")
@@ -26,7 +27,7 @@ def welcome():
         f"<br/>"
         f"/allstores<br/>"
         f"/cookiedata<br/>"
-        f"/bar_chart_store_totals'<br/>"
+        f"/bar_chart_store_totals<br/>"
         #f"/All product info"
     )
     
