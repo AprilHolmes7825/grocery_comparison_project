@@ -31,11 +31,10 @@ This project is a system made up of the following parts:
       Files: 
         import_export.py
         sqlite_setup.py
-        grocery_sql.sql
         grocery.sqlite
         grocery_comparison_diagram.png
       
-      Import_export.py uses Flask to import the final dataframes from each store and export them to our sqlite database, grocery.sqlite.
+      Import_export.py uses sqlalchemy to import the final dataframes from each store and export them to our sqlite database, grocery.sqlite.
       All grocery data is stored in grocery.sqlite.
 
   # -- Results
@@ -43,9 +42,12 @@ This project is a system made up of the following parts:
         cookie_flask
         cookie_html.html
         cookie_css.css
+        totals_by_date.png
+        store_tot_barchart.html
       
       cookie_flask queries grocery.sqlite for the minimum price per ingredient for each store, and displays the results of the query in html.
       No hardcoding in html is required, as the classes are automatically populated with the results of the query.
+      cookie_flask includes routes to html to render both bar charts.
 
 # HOW IT WORKS
 

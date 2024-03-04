@@ -23,7 +23,9 @@ app = Flask(__name__)
 def welcome():
     return (
         f"Select which cookie info you'd like to see!<br/>"
-        f"/allstores gives the minimum cost of ingredients per store, and /cookiedata returns a json of all data<br/>"
+        f"/allstores gives the minimum cost of ingredients per store and a sum total.<br/>"
+        f"/bar_chart_dates returns a chart with dates regarding database upkeep.<br/>"
+        f"/bar_chart_store_totals is an interactive barchart, hover for info.<br/>"
         f"<br/>"
         f"/allstores<br/>"
         f"/bar_chart_dates<br/>"
@@ -95,7 +97,7 @@ def homepage():
 
 @app.route('/bar_chart_dates')
 def datechart():
-    return render_template('html.html')
+    return render_template('dates_chart.html')
 
 
 if __name__ == '__main__':
