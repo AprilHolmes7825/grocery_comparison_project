@@ -156,58 +156,10 @@ def homepage():
 if __name__ == '__main__':
      app.run(debug=True)
 
-# @app.route("/Overall cookie info")
-# def names():
-#     # Create our session (link) from Python to the DB
-#     session = Session(engine)
-
-#     """Return a list of all passenger names"""
-#     # Query all passengers
-
-#     #aldi_query = session.query(products).\
-#       #  filter(products.store == 'Aldi').groupby.all()
-#     aldi_query = session.query(products.ingredient, func.min(products.price)).group_by(products.ingredient).\
-#         filter(products.store == 'Aldi').all()
-  
 
 
-#     session.close()
-
-#     aldi = list(np.ravel(aldi_query))
-#     return jsonify(aldi)
 
 
-# #127.0.0.1:5000/Overall cookie info
-
-
-#     # Convert list of tuples into normal list
-#     #all_names = list(np.ravel(results))
-
-#     #return jsonify(all_cookies)
-
-
-# @app.route("/All product info")
-# def product_info():
-#     # Create our session (link) from Python to the DB
-#     session = Session(engine)
-
-#     #"""Return a list of passenger data including the name, age, and sex of each passenger"""
-#     # Query all passengers
-#     results = session.query(products.price, products.store, products.ingredient).all()
-
-
-#     session.close()
-
-#     # Create a dictionary from the row data and append to a list of all_passengers
-#     all_Stores = []
-#     for price, store, ingredient in results:
-#         groceries = {}
-#         groceries["price"] = price
-#         groceries["store"] = store
-#         groceries["ingredient"] = ingredient
-#         all_Stores.append(groceries)
-
-#     return jsonify(all_Stores)
 
 
 

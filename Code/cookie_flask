@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import create_engine, func
 from import_export import get_products_dataframe
 from flask import Flask, jsonify, render_template
+import pandas as pd
 
 
 engine = create_engine("sqlite:///grocery.sqlite")
@@ -26,7 +27,7 @@ def welcome():
         f"<br/>"
         f"/allstores<br/>"
         f"/cookiedata<br/>"
-        #f"/Overall cookie info<br/>"
+        f"/bar_chart_store_totals<br/>"
         #f"/All product info"
     )
     
@@ -57,13 +58,62 @@ def yourcookie():
     session = Session(engine)
 
     results = session.query(products.store, products.ingredient, products.price) \
-        .group_by(products.store, products.ingredient) \
+        .group_by(products.store) \
         .all()
 
 
     session.close()
 
-    return jsonify(results)
+    all_Stores = []
+    for price, store, ingredient in results:
+        groceries = {}
+        groceries["price"] = price
+        groceries["store"] = store
+        groceries["ingredient"] = ingredient
+        all_Stores.append(groceries)
+
+    return jsonify(all_Stores)
+
+@app.route('/bar_chart_store_totals')
+def homepage():
+    session = Session(engine)
+
+    results = session.query(products.store, products.ingredient, func.min(products.price).label('min_price')) \
+        .group_by(products.store, products.ingredient) \
+        .all()
+
+    session.close()
+
+    store_min_prices = {}
+    for store, ingredient, min_price in results:
+        if store not in store_min_prices:
+            store_min_prices[store] = []
+        store_min_prices[store].append({'ingredient': ingredient, 'min_price': min_price})
+
+    # Convert the dictionary into a list of dictionaries
+    min_prices_list = [{'store': store, 'ingredients': values} for store, values in store_min_prices.items()]
+
+    # Convert the list of dictionaries to a DataFrame
+    df = pd.DataFrame(min_prices_list)
+    df = df.set_index('store')
+
+    # Define Plot Data
+    labels = df.index.tolist()
+    
+    # Calculate the total minimum price for each store
+    data = df['ingredients'].apply(lambda x: sum(item['min_price'] for item in x)).tolist()
+
+    # Return the components to the HTML template
+    return render_template(
+        template_name_or_list='store_tot_barchart.html',
+        data=data,
+        labels=labels,
+    )
+ 
+
+
+if __name__ == '__main__':
+     app.run(debug=True)
 
 
 if __name__ == '__main__':
