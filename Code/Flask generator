@@ -4,7 +4,11 @@
 
 # df = pd.DataFrame()
 # df = get_products_dataframe()
-
+from flask import Flask, render_template
+import pandas as pd
+import json
+import plotly
+import plotly.express as px
 
 import numpy as np
 import sqlalchemy
@@ -37,8 +41,7 @@ def welcome():
         f"Select which cookie info you'd like to see!<br/>"
         f"/allstores<br/>"
         f"/your_cookie<br/>"
-        #f"/Overall cookie info<br/>"
-        #f"/All product info"
+        f"/bar_chart_store_totals<br/>"
     )
 
 @app.route("/allstores")
@@ -111,6 +114,43 @@ def yourcookie():
         min_prices_list.append({'store': store, 'total_min_price': total_min_price})
     
     return jsonify(min_prices_list)
+
+@app.route('/bar_chart_store_totals')
+def homepage():
+    session = Session(engine)
+
+    results = session.query(products.store, products.ingredient, func.min(products.price).label('min_price')) \
+        .group_by(products.store, products.ingredient) \
+        .all()
+
+    session.close()
+
+    store_min_prices = {}
+    for store, ingredient, min_price in results:
+        if store not in store_min_prices:
+            store_min_prices[store] = []
+        store_min_prices[store].append({'ingredient': ingredient, 'min_price': min_price})
+
+    # Convert the dictionary into a list of dictionaries
+    min_prices_list = [{'store': store, 'ingredients': values} for store, values in store_min_prices.items()]
+
+    # Convert the list of dictionaries to a DataFrame
+    df = pd.DataFrame(min_prices_list)
+    df = df.set_index('store')
+
+    # Define Plot Data
+    labels = df.index.tolist()
+    
+    # Calculate the total minimum price for each store
+    data = df['ingredients'].apply(lambda x: sum(item['min_price'] for item in x)).tolist()
+
+    # Return the components to the HTML template
+    return render_template(
+        template_name_or_list='store_tot_barchart.html',
+        data=data,
+        labels=labels,
+    )
+ 
 
 
 if __name__ == '__main__':
