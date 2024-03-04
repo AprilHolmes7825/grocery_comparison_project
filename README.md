@@ -7,7 +7,7 @@ Description: Interactive website to compare grocery prices across several grocer
 
 # OVERVIEW:
 
-"If only there were a way to compare all grocery store prices for a recipe"
+"If only there was a way to compare all grocery store prices for a recipe"
     -- Christopher Avallon, 2024
 
 The purpose of this project is to create an application which compares grocery prices across several grocery stores, querying a database for the minumim price.
