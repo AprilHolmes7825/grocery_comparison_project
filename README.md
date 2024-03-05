@@ -31,11 +31,10 @@ This project is a system made up of the following parts:
       Files: 
         import_export.py
         sqlite_setup.py
-        grocery_sql.sql
         grocery.sqlite
         grocery_comparison_diagram.png
       
-      Import_export.py uses Flask to import the final dataframes from each store and export them to our sqlite database, grocery.sqlite.
+      Import_export.py uses sqlalchemy to import the final dataframes from each store and export them to our sqlite database, grocery.sqlite.
       All grocery data is stored in grocery.sqlite.
 
   # -- Results
@@ -43,9 +42,12 @@ This project is a system made up of the following parts:
         cookie_flask
         cookie_html.html
         cookie_css.css
+        totals_by_date.png
+        store_tot_barchart.html
       
       cookie_flask queries grocery.sqlite for the minimum price per ingredient for each store, and displays the results of the query in html.
       No hardcoding in html is required, as the classes are automatically populated with the results of the query.
+      cookie_flask includes routes to html to render both bar charts.
 
 # HOW IT WORKS
 
@@ -63,7 +65,11 @@ The database is automatically updated each time you run the data gathering/api s
 # ETHICAL CONDSIDERATIONS
 
 While scraping the websites for Aldi and Walmart has an overall minimal impact on their traffic, it's not how these websites were designed or intended to be used.
-Therefore, it was important to us to have as little impact as possible, which is why we've set this system to only webscrape when we need to update the database. 
+Therefore, it was important to us to have as little impact as possible, which is why we've set this system to only webscrape when we need to update the database. \
+
+# KNOWN ISSUE
+Walmart website has changed while working on this project, causing data collection to fail in the past. We've worked to fix the issue, but longevity isn't necessarily guranteed.
+Further updates to the website could cause issues in the future.
 
 
 
